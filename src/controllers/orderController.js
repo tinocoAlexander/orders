@@ -52,7 +52,7 @@ export const createOrder = async (req, res) => {
       products,
       total,
       status: "pendiente",
-      creationDate: new Date(),
+      // no necesitas pasar creationDate si tu modelo lo autogenera
     });
 
     return res.status(201).json({ message: "Orden creada correctamente", data: newOrder });
@@ -67,6 +67,13 @@ export const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
+  const validStatuses = ['pendiente', 'enviado', 'entregado', 'cancelado'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({
+      message: `Estado inválido. Estados permitidos: ${validStatuses.join(', ')}`
+    });
+  }
+
   try {
     const order = await Order.findByPk(id);
 
@@ -77,9 +84,32 @@ export const updateOrderStatus = async (req, res) => {
     await order.update({ status });
 
     return res.status(200).json({ message: "Estado de la orden actualizado", data: order });
-
   } catch (error) {
     console.error("Error al actualizar estado de orden:", error);
     res.status(500).json({ message: "Error al actualizar estado de orden" });
+  }
+};
+
+// Cancelar (eliminar lógicamente) una orden
+export const cancelOrder = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Order.findByPk(id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    if (order.status === "cancelado") {
+      return res.status(400).json({ message: "La orden ya está cancelada" });
+    }
+
+    await order.update({ status: "cancelado" });
+
+    return res.status(200).json({ message: "Orden cancelada correctamente", data: order });
+  } catch (error) {
+    console.error("Error al cancelar orden:", error);
+    res.status(500).json({ message: "Error al cancelar orden" });
   }
 };

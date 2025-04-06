@@ -4,10 +4,12 @@ import {
   getOrdersByClient,
   createOrder,
   updateOrderStatus,
-} from "../controllers/orderController.js"; // Importar controladores de órdenes
+  cancelOrder
+} from "../controllers/orderController.js";
 
 const router = express.Router(); // Router para órdenes
 
+// Obtener una orden por ID
 router.get("/:id", getOrderById);
 /**
  * @swagger
@@ -26,10 +28,11 @@ router.get("/:id", getOrderById);
  *           type: integer
  *         description: Order ID
  *     responses:
- *      '200':
- *        description: A successful response
+ *       '200':
+ *         description: A successful response
  */
 
+// Obtener todas las órdenes de un cliente
 router.get("/client/:clientId", getOrdersByClient);
 /**
  * @swagger
@@ -45,10 +48,11 @@ router.get("/client/:clientId", getOrdersByClient);
  *           type: integer
  *         description: Client ID
  *     responses:
- *      '200':
- *        description: A successful response
+ *       '200':
+ *         description: A successful response
  */
 
+// Crear una nueva orden
 router.post("/create", createOrder);
 /**
  * @swagger
@@ -56,11 +60,31 @@ router.post("/create", createOrder);
  *   post:
  *     summary: Create a new order
  *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - clientId
+ *               - products
+ *               - total
+ *             properties:
+ *               clientId:
+ *                 type: integer
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               total:
+ *                 type: number
  *     responses:
- *      '201':
- *        description: Order created successfully
+ *       '201':
+ *         description: Order created successfully
  */
 
+// Actualizar estado de la orden
 router.patch("/status/:id", updateOrderStatus);
 /**
  * @swagger
@@ -75,9 +99,41 @@ router.patch("/status/:id", updateOrderStatus);
  *         schema:
  *           type: integer
  *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pendiente, enviado, entregado, cancelado]
  *     responses:
- *      '200':
- *        description: Order status updated
+ *       '200':
+ *         description: Order status updated
+ */
+
+// Cancelar (eliminar lógicamente) una orden
+router.delete("/:id", cancelOrder);
+/**
+ * @swagger
+ * /app/orders/{id}:
+ *   delete:
+ *     summary: Cancel an order
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Order ID
+ *     responses:
+ *       '200':
+ *         description: Order cancelled successfully
  */
 
 export default router;
