@@ -1,4 +1,5 @@
 import Order from "../models/orderModel.js";
+import Client from "../models/clientModel.js";
 
 // Obtener una orden por ID
 export const getOrderById = async (req, res) => {
@@ -39,6 +40,13 @@ export const createOrder = async (req, res) => {
   }
 
   try {
+    // Verificar si el cliente existe y está activo
+    const clientExists = await Client.findOne({ where: { id: clientId, status: true } });
+
+    if (!clientExists) {
+      return res.status(404).json({ message: "Cliente no encontrado o inactivo" });
+    }
+
     const newOrder = await Order.create({
       clientId,
       products,

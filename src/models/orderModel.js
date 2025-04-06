@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/bd.js";
+import Client from "./clientModel.js";
 
 const Order = sequelize.define("Order", {
   id: {
@@ -10,6 +11,10 @@ const Order = sequelize.define("Order", {
   clientId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: Client,
+      key: "id",
+    }
   },
   products: {
     type: DataTypes.JSON,
@@ -23,7 +28,7 @@ const Order = sequelize.define("Order", {
   status: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: "pendiente", // puede ser: pendiente, enviado, entregado, cancelado
+    defaultValue: "pendiente",
   },
   creationDate: {
     type: DataTypes.DATE,
@@ -34,5 +39,8 @@ const Order = sequelize.define("Order", {
   timestamps: false,
   tableName: "orders",
 });
+
+// Relación explícita
+Order.belongsTo(Client, { foreignKey: "clientId" });
 
 export default Order;
